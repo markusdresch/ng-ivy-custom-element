@@ -1,47 +1,34 @@
-// // import { enableProdMode } from '@angular/core';
-// import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-
-// import { AppModule } from './app/app.module';
-// // import { environment } from './environments/environment';
-
-// // if (environment.production) {
-// //   enableProdMode();
-// // }
-
-// platformBrowserDynamic().bootstrapModule(AppModule, { ngZone: 'noop'})
-//   .catch(err => console.error(err));
-
-import { Injector, Sanitizer, ɵLifecycleHooksFeature as LifecycleHooksFeature, ɵrenderComponent as renderComponent } from '@angular/core';
-import { DomSanitizer, ɵDomSanitizerImpl as DomSanitizerImpl } from '@angular/platform-browser';
+import { Injector, ɵrenderComponent as renderComponent, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHandler, HttpXhrBackend } from '@angular/common/http';
 import { createCustomElement } from '@angular/elements';
 
 import { AppComponent } from './app/app.component';
+import { PushPipe } from './app/pipes/push.pipe';
+import { JsonPipe } from '@angular/common';
 
-// const rootInjector: Injector = Injector.create({
-//   name: 'root',
-//   providers: [
-//     {
-//       deps: [],
-//       provide: DomSanitizer,
-//       useClass: DomSanitizerImpl,
-//     },
-//     {
-//       provide: Sanitizer,
-//       useExisting: DomSanitizer,
-//     },
-//     { provide: HttpClient, deps: [ HttpHandler ] },
-//     { provide: HttpHandler, useValue: new HttpXhrBackend({ build: () => new XMLHttpRequest() }) }
-//   ]
-// });
+const injector: Injector = Injector.create({
+  name: 'root',
+  providers: [
+    { provide: HttpClient, deps: [ HttpHandler ] },
+    { provide: HttpHandler, useValue: new HttpXhrBackend({ build: () => new XMLHttpRequest() }) },
+    // { provide: PushPipe, deps: [ ChangeDetectorRef ] },
+    // { provide: JsonPipe, deps: [] },
+    // { provide: AppComponent, deps: [ JsonPipe, PushPipe, HttpClient ] }
+  ]
+});
 
-renderComponent(AppComponent/*, {
-  hostFeatures: [
-    LifecycleHooksFeature,
-  ],
-  injector: rootInjector,
-  sanitizer: rootInjector.get(Sanitizer)
-}*/);
+// this correcly renders the component, but not as a custom element
+// renderComponent(AppComponent, { injector: injector });
 
-// customElements.define('ng-ivy-custom-element',
-//             createCustomElement(AppComponent, { injector: rootInjector }));
+// this yields a ComponentFactoryResolver null ref exception
+// customElements.define('ng-ivy-custom-element', createCustomElement(AppComponent, { injector: injector }));
+
+class AppComponentCustomElement extends HTMLElement {
+  constructor() {
+    super();
+
+    renderComponent(AppComponent, { injector: injector });
+  }
+}
+
+customElements.define('ng-ivy-custom-element', AppComponentCustomElement);
