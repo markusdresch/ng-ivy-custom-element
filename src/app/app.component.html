@@ -1,0 +1,7 @@
+<h1>Welcome to {{ title }}!</h1>
+
+{{ in }}
+
+<div *ngIf="(data$ | push) as model">
+ {{ model }}
+</div>
