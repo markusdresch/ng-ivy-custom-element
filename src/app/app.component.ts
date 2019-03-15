@@ -1,7 +1,9 @@
 import { Component, ChangeDetectionStrategy, ViewEncapsulation, Input } from '@angular/core';
-import { HttpClient, HttpHandler } from '@angular/common/http';
+import { HttpClient, HttpHandler, HttpXhrBackend } from '@angular/common/http';
 import { Model } from './models/model';
 import { BehaviorSubject } from 'rxjs';
+import { PushPipe } from './pipes/push.pipe';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'ng-ivy-custom-element',
@@ -9,15 +11,29 @@ import { BehaviorSubject } from 'rxjs';
   styleUrls: ['./app.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.ShadowDom,
-  // providers: [ { provide: HttpClient, deps: [ HttpHandler ] } ]
+
+  providers: [
+    { provide: HttpClient, deps: [ HttpHandler ] },
+    { provide: HttpHandler, useValue: new HttpXhrBackend({ build: () => new XMLHttpRequest() }) },
+    // { provide: PushPipe }
+    // { provide: AsyncPipe }
+  ]
 })
 export class AppComponent {
 
     title = 'ng-ivy-custom-element';
 
+    private in: string;
+
     @Input('in')
     set inputAttribute(value: string) {
-        console.log(value);
+        console.log('setter', value);
+        this.in = value;
+    }
+
+    get inputAttribute(): string {
+        console.log('getter', this.in);
+        return this.in;
     }
 
     private dataSubject = new BehaviorSubject<Model>(null);
@@ -26,7 +42,7 @@ export class AppComponent {
     // private http: HttpClient;
     constructor(private http: HttpClient) {
         http.get<Model>('https://jsonplaceholder.typicode.com/todos/1').subscribe(data => {
-            console.log(data);
+            console.log('loaded remote data', data);
             this.dataSubject.next(data);
         });
     }

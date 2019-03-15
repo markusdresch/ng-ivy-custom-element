@@ -11,7 +11,37 @@
 // platformBrowserDynamic().bootstrapModule(AppModule, { ngZone: 'noop'})
 //   .catch(err => console.error(err));
 
-import { ɵrenderComponent as renderComponent } from '@angular/core';
+import { Injector, Sanitizer, ɵLifecycleHooksFeature as LifecycleHooksFeature, ɵrenderComponent as renderComponent } from '@angular/core';
+import { DomSanitizer, ɵDomSanitizerImpl as DomSanitizerImpl } from '@angular/platform-browser';
+import { HttpClient, HttpHandler, HttpXhrBackend } from '@angular/common/http';
+import { createCustomElement } from '@angular/elements';
+
 import { AppComponent } from './app/app.component';
 
-renderComponent(AppComponent);
+// const rootInjector: Injector = Injector.create({
+//   name: 'root',
+//   providers: [
+//     {
+//       deps: [],
+//       provide: DomSanitizer,
+//       useClass: DomSanitizerImpl,
+//     },
+//     {
+//       provide: Sanitizer,
+//       useExisting: DomSanitizer,
+//     },
+//     { provide: HttpClient, deps: [ HttpHandler ] },
+//     { provide: HttpHandler, useValue: new HttpXhrBackend({ build: () => new XMLHttpRequest() }) }
+//   ]
+// });
+
+renderComponent(AppComponent/*, {
+  hostFeatures: [
+    LifecycleHooksFeature,
+  ],
+  injector: rootInjector,
+  sanitizer: rootInjector.get(Sanitizer)
+}*/);
+
+// customElements.define('ng-ivy-custom-element',
+//             createCustomElement(AppComponent, { injector: rootInjector }));
